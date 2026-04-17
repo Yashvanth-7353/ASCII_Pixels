@@ -6,35 +6,39 @@ import './App.css';
 export default function App() {
   const [cols, setCols] = useState(160); 
   const [rows, setRows] = useState(75);
-  const [colorMode, setColorMode] = useState('green');
-  const [brightness, setBrightness] = useState(10); // Default slight boost
-  const [contrast, setContrast] = useState(1.4);    // Default punchy contrast
+  const [brightness, setBrightness] = useState(10);
+  const [contrast, setContrast] = useState(1.4);
+  
+  // NEW: Dynamic Aesthetic Controls
+  const [charSpacing, setCharSpacing] = useState(0); // 0em is the optimal default
+  const [colorHue, setColorHue] = useState(120);     // 120 is classic Matrix Green
 
   const { videoRef, canvasRef, asciiText, error, isActive, startCamera, stopCamera } =
     useAsciiCamera({ cols, rows, brightness, contrast });
 
-  const toggleColor = () => {
-    setColorMode(prev => (prev === 'green' ? 'white' : 'green'));
-  };
+  // Calculate dynamic colors based on the Hue slider
+  const themeColor = `hsl(${colorHue}, 100%, 60%)`;
+  const themeGlow = `hsla(${colorHue}, 100%, 50%, 0.3)`;
 
   return (
     <div className="app-container">
       <header className="header">
-        <h1>ASCII VISIONS</h1>
+        <h1 style={{ textShadow: `0 0 15px ${themeGlow}` }}>ASCII VISIONS</h1>
         <p className="subtitle">High-Fidelity Terminal Optics</p>
       </header>
 
       {/* Main Controls */}
-      <div className="control-panel">
+      <div className="control-panel" style={{ borderColor: themeGlow, boxShadow: `inset 0 0 20px ${themeGlow}` }}>
         <button 
           className={`btn btn-primary ${isActive ? 'active' : ''}`} 
           onClick={isActive ? stopCamera : startCamera}
+          style={{ 
+            color: isActive ? '#ff4444' : themeColor, 
+            borderColor: isActive ? '#ff4444' : themeColor,
+            textShadow: isActive ? '0 0 5px rgba(255,68,68,0.5)' : `0 0 5px ${themeGlow}`
+          }}
         >
           {isActive ? '⏹ TERMINATE FEED' : '▶ INITIATE CAMERA'}
-        </button>
-
-        <button className="btn btn-secondary" onClick={toggleColor}>
-          ◧ THEME: {colorMode === 'green' ? 'MATRIX' : 'GHOST'}
         </button>
 
         {/* Resolution Sliders */}
@@ -64,6 +68,20 @@ export default function App() {
               onChange={e => setContrast(Number(e.target.value))} />
           </label>
         </div>
+
+        {/* NEW: Spacing & Color Sliders */}
+        <div className="sliders-container">
+          <label className="slider-label">
+            <span>SPACING: {charSpacing.toFixed(2)}em</span>
+            <input type="range" min="-0.1" max="0.5" step="0.01" value={charSpacing}
+              onChange={e => setCharSpacing(Number(e.target.value))} />
+          </label>
+          <label className="slider-label">
+            <span style={{ color: themeColor }}>HUE: {colorHue}°</span>
+            <input type="range" min="0" max="360" value={colorHue}
+              onChange={e => setColorHue(Number(e.target.value))} />
+          </label>
+        </div>
       </div>
 
       <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
@@ -71,13 +89,21 @@ export default function App() {
 
       {error && <div className="error-box">{error}</div>}
 
-      <div className={`terminal-container ${colorMode}`}>
+      {/* Terminal Output */}
+      <div className="terminal-container" style={{ borderColor: themeGlow }}>
         {asciiText ? (
-          <pre className="ascii-output">
+          <pre 
+            className="ascii-output"
+            style={{ 
+              letterSpacing: `${charSpacing}em`,
+              color: themeColor,
+              textShadow: `0 0 4px ${themeGlow}`
+            }}
+          >
             {asciiText}
           </pre>
         ) : (
-          <div className="placeholder">
+          <div className="placeholder" style={{ color: themeColor }}>
             <span className="blink">_</span> AWAITING VIDEO INPUT...
           </div>
         )}

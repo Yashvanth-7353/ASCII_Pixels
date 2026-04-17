@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   font-family: 'Courier New', Courier, monospace;
 }
@@ -15,7 +15,7 @@
   font-weight: bold;
   letter-spacing: 0.2em;
   margin: 0 0 8px 0;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  transition: text-shadow 0.3s ease;
 }
 
 .subtitle {
@@ -28,45 +28,47 @@
 /* --- Control Panel --- */
 .control-panel {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
   flex-wrap: wrap;
   background: #111;
   padding: 16px 24px;
   border-radius: 8px;
-  border: 1px solid #333;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  border: 1px solid transparent; /* Handled by React inline styles */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .sliders-container {
   display: flex;
-  gap: 24px;
-  margin-left: auto; /* Pushes sliders to the right */
+  gap: 16px;
+  padding: 0 12px;
+  border-left: 1px solid #333;
 }
 
 .slider-label {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 12px;
+  font-size: 11px;
   color: #aaa;
   letter-spacing: 0.1em;
+  width: 100px;
 }
 
 /* Custom Range Sliders */
 input[type=range] {
   -webkit-appearance: none;
-  width: 120px;
+  width: 100%;
   background: transparent;
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 16px;
-  width: 8px;
+  height: 14px;
+  width: 6px;
   border-radius: 2px;
   background: #fff;
   cursor: pointer;
-  margin-top: -6px;
+  margin-top: -5px;
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
@@ -74,10 +76,6 @@ input[type=range]::-webkit-slider-runnable-track {
   cursor: pointer;
   background: #333;
   border-radius: 2px;
-}
-input[type=range]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* --- Buttons --- */
@@ -90,35 +88,11 @@ input[type=range]:disabled {
   border-radius: 4px;
   transition: all 0.2s ease;
   font-weight: bold;
-}
-
-.btn-primary {
   background: transparent;
-  color: #fff;
-  border: 1px solid #fff;
-}
-.btn-primary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-}
-.btn-primary.active {
-  color: #ff4444;
-  border-color: #ff4444;
-}
-.btn-primary.active:hover {
-  background: rgba(255, 68, 68, 0.1);
-  box-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
 }
 
-.btn-secondary {
-  background: #222;
-  color: #aaa;
-  border: 1px solid #444;
-}
-.btn-secondary:hover {
-  color: #fff;
-  border-color: #fff;
-  background: #333;
+.btn-primary:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* --- Terminal Display Area --- */
@@ -126,14 +100,15 @@ input[type=range]:disabled {
   background: #050505;
   border-radius: 8px;
   padding: 16px;
-  min-height: 400px;
+  min-height: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #222;
+  border: 1px solid transparent; /* Handled by React */
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   position: relative;
   overflow: hidden;
+  transition: border-color 0.3s ease;
 }
 
 /* Scanline overlay effect */
@@ -141,10 +116,7 @@ input[type=range]:disabled {
   content: " ";
   display: block;
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  top: 0; left: 0; bottom: 0; right: 0;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
   z-index: 2;
   background-size: 100% 2px, 3px 100%;
@@ -153,39 +125,22 @@ input[type=range]:disabled {
 
 .ascii-output {
   font-size: 6px;
-  line-height: 0.75; /* Keeps aspect ratio intact */
-  letter-spacing: 0em;
+  line-height: 0.75; 
   white-space: pre;
   user-select: none;
   display: inline-block;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  transition: color 0.1s ease, text-shadow 0.1s ease;
   position: relative;
   z-index: 1;
+
+  /* Disables blurry anti-aliasing for a sharp, pixelated look */
   -webkit-font-smoothing: none;
   font-smooth: never;
-  text-rendering: optimizeSpeed;
-}
-
-/* Color Themes */
-.terminal-container.green {
-  border-color: #00ff4133;
-}
-.terminal-container.green .ascii-output {
-  color: #00ff41;
-  text-shadow: 0 0 3px rgba(0, 255, 65, 0.4);
-}
-
-.terminal-container.white {
-  border-color: #ffffff33;
-}
-.terminal-container.white .ascii-output {
-  color: #ffffff;
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
+  text-rendering: optimizeSpeed; 
 }
 
 /* Placeholder state */
 .placeholder {
-  color: #444;
   font-size: 14px;
   letter-spacing: 0.1em;
 }
