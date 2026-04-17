@@ -1,141 +1,87 @@
 // src/App.jsx
-import { useState } from "react";
-import { useAsciiCamera } from "./useAsciiCamera";
+import { useState } from 'react';
+import { useAsciiCamera } from './useAsciiCamera';
+import './App.css'; 
 
 export default function App() {
-  const [cols, setCols] = useState(120);
-  const [rows, setRows] = useState(55);
+  const [cols, setCols] = useState(160); 
+  const [rows, setRows] = useState(75);
+  const [colorMode, setColorMode] = useState('green');
+  const [brightness, setBrightness] = useState(10); // Default slight boost
+  const [contrast, setContrast] = useState(1.4);    // Default punchy contrast
 
-  const {
-    videoRef,
-    canvasRef,
-    asciiText,
-    error,
-    isActive,
-    startCamera,
-    stopCamera,
-  } = useAsciiCamera({ cols, rows });
+  const { videoRef, canvasRef, asciiText, error, isActive, startCamera, stopCamera } =
+    useAsciiCamera({ cols, rows, brightness, contrast });
+
+  const toggleColor = () => {
+    setColorMode(prev => (prev === 'green' ? 'white' : 'green'));
+  };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <h1 style={{ fontSize: "20px", fontWeight: 500, letterSpacing: "0.1em" }}>
-        ASCII CAMERA
-      </h1>
+    <div className="app-container">
+      <header className="header">
+        <h1>ASCII VISIONS</h1>
+        <p className="subtitle">High-Fidelity Terminal Optics</p>
+      </header>
 
-      {/* Controls */}
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <button
+      {/* Main Controls */}
+      <div className="control-panel">
+        <button 
+          className={`btn btn-primary ${isActive ? 'active' : ''}`} 
           onClick={isActive ? stopCamera : startCamera}
-          style={btnStyle(isActive)}
         >
-          {isActive ? "⏹ Stop" : "▶ Start Camera"}
+          {isActive ? '⏹ TERMINATE FEED' : '▶ INITIATE CAMERA'}
         </button>
-        // 1. Update your sliders to allow higher resolution for more detail
-        <label
-          style={{
-            fontSize: "13px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          Cols: {cols}
-          <input
-            type="range"
-            min="60"
-            max="250"
-            value={cols}
-            onChange={(e) => setCols(Number(e.target.value))}
-            disabled={isActive}
-            style={{ width: "100px" }}
-          />
-        </label>
-        <label
-          style={{
-            fontSize: "13px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          Rows: {rows}
-          <input
-            type="range"
-            min="30"
-            max="120"
-            value={rows}
-            onChange={(e) => setRows(Number(e.target.value))}
-            disabled={isActive}
-            style={{ width: "100px" }}
-          />
-        </label>
+
+        <button className="btn btn-secondary" onClick={toggleColor}>
+          ◧ THEME: {colorMode === 'green' ? 'MATRIX' : 'GHOST'}
+        </button>
+
+        {/* Resolution Sliders */}
+        <div className="sliders-container">
+          <label className="slider-label">
+            <span>COLS: {cols}</span>
+            <input type="range" min="80" max="300" value={cols}
+              onChange={e => setCols(Number(e.target.value))} />
+          </label>
+          <label className="slider-label">
+            <span>ROWS: {rows}</span>
+            <input type="range" min="40" max="140" value={rows}
+              onChange={e => setRows(Number(e.target.value))} />
+          </label>
+        </div>
+
+        {/* Calibration Sliders */}
+        <div className="sliders-container">
+          <label className="slider-label">
+            <span>BRIGHT: {brightness}</span>
+            <input type="range" min="-100" max="100" value={brightness}
+              onChange={e => setBrightness(Number(e.target.value))} />
+          </label>
+          <label className="slider-label">
+            <span>CONTRAST: {contrast.toFixed(1)}x</span>
+            <input type="range" min="0.5" max="3.0" step="0.1" value={contrast}
+              onChange={e => setContrast(Number(e.target.value))} />
+          </label>
+        </div>
       </div>
 
-      {/* Hidden video + canvas (used only for processing) */}
-      <video ref={videoRef} style={{ display: "none" }} playsInline muted />
-      <canvas ref={canvasRef} style={{ display: "none" }} />
+      <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      {/* Error */}
-      {error && <p style={{ color: "#ff4444", fontSize: "14px" }}>{error}</p>}
+      {error && <div className="error-box">{error}</div>}
 
-      {/* ASCII output */}
-      {asciiText ? (
-        <pre
-          style={{
-            fontFamily: "'Courier New', monospace",
-            fontSize: "7px", // Slightly smaller font
-            lineHeight: "0.75", // <-- CRITICAL: squishes lines together to fix aspect ratio
-            color: "#00ff41",
-            letterSpacing: "0em", // <-- CRITICAL: removes horizontal gaps
-            whiteSpace: "pre",
-            userSelect: "none",
-            background: "#0a0a0a",
-            padding: "8px",
-            borderRadius: "4px",
-            border: "1px solid #1a3a1a",
-            overflow: "hidden",
-            display: "inline-block", // Helps contain the shape
-          }}
-        >
-          {asciiText}
-        </pre>
-      ) : (
-        <div
-          style={{
-            height: "300px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "1px dashed #1a3a1a",
-            borderRadius: "4px",
-            color: "#2a6a2a",
-            fontSize: "14px",
-          }}
-        >
-          Press "Start Camera" to begin
-        </div>
-      )}
+      <div className={`terminal-container ${colorMode}`}>
+        {asciiText ? (
+          <pre className="ascii-output">
+            {asciiText}
+          </pre>
+        ) : (
+          <div className="placeholder">
+            <span className="blink">_</span> AWAITING VIDEO INPUT...
+          </div>
+        )}
+      </div>
     </div>
   );
-}
-
-function btnStyle(isActive) {
-  return {
-    padding: "8px 18px",
-    background: isActive ? "#1a0a0a" : "#0a1a0a",
-    color: isActive ? "#ff4444" : "#00ff41",
-    border: `1px solid ${isActive ? "#ff4444" : "#00ff41"}`,
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontFamily: "monospace",
-    fontSize: "14px",
-    letterSpacing: "0.05em",
-  };
 }
